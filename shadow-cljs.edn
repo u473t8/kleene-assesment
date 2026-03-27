@@ -1,0 +1,33 @@
+{:dependencies
+ [[binaryage/devtools "1.0.7"]
+  [metosin/reitit-frontend "0.10.1"]
+  [no.cjohansen/replicant "2025.12.1"]
+  [no.cjohansen/nexus "2025.11.1"]
+  [no.cjohansen/portfolio "2026.03.1"]]
+
+ :source-paths ["src" "test"]
+
+ :nrepl {:port 4444}
+
+ :dev-http
+ {3000 "resources/public"
+  3001 ["resources/public/portfolio" "resources/public" "classpath:public"]}
+
+ :builds
+ {:app
+  {:target :browser
+   :output-dir "resources/public/js/app"
+   :asset-path "/js/app"
+   :modules {:main {:entries [app.core]
+                    :init-fn app.core/init}}
+   :devtools {:after-load app.core/start!}}
+
+  :portfolio
+  {:target :portfolio
+   :runner-ns portfolio.core
+   :dev {:output-dir "resources/public/portfolio/js"}}
+
+  :test
+  {:target :node-test
+   :output-to "out/test.js"
+   :ns-regexp "-test$"}}}

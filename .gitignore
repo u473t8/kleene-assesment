@@ -1,0 +1,27 @@
+# Compiled output
+resources/public/js/
+resources/public/portfolio/js/
+out/
+
+# Dependencies
+node_modules/
+.cpcache/
+.shadow-cljs/
+
+# clj-kondo cache
+.clj-kondo/.cache/
+
+# LSP cache
+.lsp/.cache/
+
+# macOS archive metadata
+__MACOSX/
+docs/__MACOSX/
+
+# Editor
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store

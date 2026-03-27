@@ -1,0 +1,37 @@
+{;; Base community style with respect for existing newlines
+ :style [:community :respect-nl]
+
+ ;; Line width
+ :width 120
+
+ ;; Two blank lines between top-level forms
+ ;; (3 newlines = 2 blank lines)
+ :parse {:interpose "\n\n\n"}
+
+ ;; Map formatting
+ :map {:comma? false         ; No commas in maps (Clojure style)
+       :respect-nl? true     ; Disable respect-nl to allow sorting
+       :sort-in-code? false} ; Do not sort maps in code (e.g. destructuring)
+
+ ;; Reader conditionals - proper indentation when multiline
+ :reader-cond {:indent 0}
+
+ :comment {:count? nil :wrap? nil}
+
+ ;; Function-specific formatting
+ :fn-map
+ {;; Threading macros - keep short forms on one line
+  "->" :none
+  "->>" :none
+  ":import" [:none {:list {:indent 1}}]
+  ":require" [:none {:list {:indent 1}}]
+  "async" :arg1-body
+  "async-testing" :arg1-body
+  "extend-protocol" :arg1-body
+  "reify"
+  [:arg1-body
+   {:next-inner
+    {:fn-map {:default :arg1-body}
+     :next-inner-restore [[:fn-map :default]]}}]
+  "some->" :none
+  "some->>" :none}}

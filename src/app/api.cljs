@@ -1,0 +1,239 @@
+(ns app.api)
+
+
+(defn- normalize-step
+  [s]
+  {:name (get s "name")
+   :status (get s "status")})
+
+
+(defn- normalize-run
+  [r]
+  {:id            (get r "id")
+   :pipeline-name (get r "pipelineName")
+   :status        (get r "status")
+   :started-at    (get r "startedAt")
+   :finished-at   (get r "finishedAt")
+   :duration-secs (get r "durationSeconds")
+   :owner         (get r "owner")
+   :trigger-type  (get r "triggerType")
+   :error-message (get r "errorMessage")
+   :steps         (mapv normalize-step (get r "steps"))})
+
+
+(def ^:private raw-runs
+  [{"id" "run_1001"
+    "pipelineName" "partner_order_ingest"
+    "status" "failed"
+    "startedAt" "2026-03-15T08:37:00Z"
+    "finishedAt" "2026-03-15T08:40:30Z"
+    "durationSeconds" 210
+    "owner" "data@company.com"
+    "triggerType" "manual"
+    "errorMessage" "Schema drift detected"
+    "steps" [{"name" "extract" "status" "success"}
+             {"name" "transform" "status" "failed"}
+             {"name" "load" "status" "queued"}]}
+   {"id" "run_1002"
+    "pipelineName" "billing_event_normaliser"
+    "status" "failed"
+    "startedAt" "2026-03-15T09:14:00Z"
+    "finishedAt" "2026-03-15T09:15:35Z"
+    "durationSeconds" 95
+    "owner" "platform@company.com"
+    "triggerType" "api"
+    "errorMessage" "Timeout while fetching source data"
+    "steps" [{"name" "extract" "status" "success"}
+             {"name" "transform" "status" "failed"}
+             {"name" "load" "status" "queued"}]}
+   {"id" "run_1003"
+    "pipelineName" "daily_customer_sync"
+    "status" "failed"
+    "startedAt" "2026-03-15T09:51:00Z"
+    "finishedAt" "2026-03-15T10:06:05Z"
+    "durationSeconds" 905
+    "owner" "platform@company.com"
+    "triggerType" "api"
+    "errorMessage" "Timeout while fetching source data"
+    "steps" [{"name" "extract" "status" "success"}
+             {"name" "transform" "status" "failed"}
+             {"name" "load" "status" "queued"}]}
+   {"id" "run_1004"
+    "pipelineName" "partner_order_ingest"
+    "status" "failed"
+    "startedAt" "2026-03-15T10:28:00Z"
+    "finishedAt" "2026-03-15T10:29:35Z"
+    "durationSeconds" 95
+    "owner" "ops@company.com"
+    "triggerType" "api"
+    "errorMessage" "Schema drift detected"
+    "steps" [{"name" "extract" "status" "success"}
+             {"name" "transform" "status" "failed"}
+             {"name" "load" "status" "queued"}]}
+   #_{"id" "run_1005"
+    "pipelineName" "uk_school_attendance_import"
+    "status" "running"
+    "startedAt" "2026-03-15T11:05:00Z"
+    "finishedAt" nil
+    "durationSeconds" nil
+    "owner" "platform@company.com"
+    "triggerType" "manual"
+    "errorMessage" nil
+    "steps" [{"name" "extract" "status" "success"}
+             {"name" "transform" "status" "running"}
+             {"name" "load" "status" "queued"}]}
+   {"id" "run_1006"
+    "pipelineName" "nightly_usage_rollup"
+    "status" "failed"
+    "startedAt" "2026-03-15T11:42:00Z"
+    "finishedAt" "2026-03-15T11:43:35Z"
+    "durationSeconds" 95
+    "owner" "data@company.com"
+    "triggerType" "scheduled"
+    "errorMessage" "Snowflake warehouse unavailable"
+    "steps" [{"name" "extract" "status" "success"}
+             {"name" "transform" "status" "failed"}
+             {"name" "load" "status" "queued"}]}
+   {"id" "run_1007"
+    "pipelineName" "forecast_model_scoring"
+    "status" "failed"
+    "startedAt" "2026-03-15T12:19:00Z"
+    "finishedAt" "2026-03-15T12:20:35Z"
+    "durationSeconds" 95
+    "owner" "analytics@company.com"
+    "triggerType" "api"
+    "errorMessage" "Permission denied for destination table"
+    "steps" [{"name" "extract" "status" "success"}
+             {"name" "transform" "status" "failed"}
+             {"name" "load" "status" "queued"}]}
+   {"id" "run_1008"
+    "pipelineName" "billing_event_normaliser"
+    "status" "queued"
+    "startedAt" "2026-03-15T12:56:00Z"
+    "finishedAt" nil
+    "durationSeconds" nil
+    "owner" "ops@company.com"
+    "triggerType" "manual"
+    "errorMessage" nil
+    "steps" [{"name" "extract" "status" "queued"}
+             {"name" "transform" "status" "queued"}
+             {"name" "load" "status" "queued"}]}
+   {"id" "run_1009"
+    "pipelineName" "crm_delta_load"
+    "status" "success"
+    "startedAt" "2026-03-15T13:33:00Z"
+    "finishedAt" "2026-03-15T13:48:05Z"
+    "durationSeconds" 905
+    "owner" "data@company.com"
+    "triggerType" "manual"
+    "errorMessage" nil
+    "steps" [{"name" "extract" "status" "success"}
+             {"name" "transform" "status" "success"}
+             {"name" "load" "status" "success"}]}
+   {"id" "run_1010"
+    "pipelineName" "partner_order_ingest"
+    "status" "queued"
+    "startedAt" "2026-03-15T14:10:00Z"
+    "finishedAt" nil
+    "durationSeconds" nil
+    "owner" "ops@company.com"
+    "triggerType" "manual"
+    "errorMessage" nil
+    "steps" [{"name" "extract" "status" "queued"}
+             {"name" "transform" "status" "queued"}
+             {"name" "load" "status" "queued"}]}
+   {"id" "run_1011"
+    "pipelineName" "daily_customer_sync"
+    "status" "success"
+    "startedAt" "2026-03-15T14:47:00Z"
+    "finishedAt" "2026-03-15T14:57:10Z"
+    "durationSeconds" 610
+    "owner" "ops@company.com"
+    "triggerType" "api"
+    "errorMessage" nil
+    "steps" [{"name" "extract" "status" "success"}
+             {"name" "transform" "status" "success"}
+             {"name" "load" "status" "success"}]}
+   #_{"id" "run_1012"
+    "pipelineName" "uk_school_attendance_import"
+    "status" "running"
+    "startedAt" "2026-03-15T15:24:00Z"
+    "finishedAt" nil
+    "durationSeconds" nil
+    "owner" "analytics@company.com"
+    "triggerType" "manual"
+    "errorMessage" nil
+    "steps" [{"name" "extract" "status" "success"}
+             {"name" "transform" "status" "running"}
+             {"name" "load" "status" "queued"}]}
+   {"id" "run_1013"
+    "pipelineName" "warehouse_dim_refresh"
+    "status" "failed"
+    "startedAt" "2026-03-15T16:01:00Z"
+    "finishedAt" "2026-03-15T16:08:00Z"
+    "durationSeconds" 420
+    "owner" "data@company.com"
+    "triggerType" "scheduled"
+    "errorMessage" "Schema drift detected"
+    "steps" [{"name" "extract" "status" "success"}
+             {"name" "transform" "status" "failed"}
+             {"name" "load" "status" "queued"}]}
+   {"id" "run_1014"
+    "pipelineName" "ad_spend_transform"
+    "status" "success"
+    "startedAt" "2026-03-15T16:38:00Z"
+    "finishedAt" "2026-03-15T16:41:30Z"
+    "durationSeconds" 210
+    "owner" "data@company.com"
+    "triggerType" "manual"
+    "errorMessage" nil
+    "steps" [{"name" "extract" "status" "success"}
+             {"name" "transform" "status" "success"}
+             {"name" "load" "status" "success"}]}
+   {"id" "run_1015"
+    "pipelineName" "crm_delta_load"
+    "status" "failed"
+    "startedAt" "2026-03-15T17:15:00Z"
+    "finishedAt" "2026-03-15T17:18:30Z"
+    "durationSeconds" 210
+    "owner" "platform@company.com"
+    "triggerType" "scheduled"
+    "errorMessage" "Permission denied for destination table"
+    "steps" [{"name" "extract" "status" "success"}
+             {"name" "transform" "status" "failed"}
+             {"name" "load" "status" "queued"}]}
+   {"id" "run_1016"
+    "pipelineName" "crm_delta_load"
+    "status" "failed"
+    "startedAt" "2026-03-15T17:52:00Z"
+    "finishedAt" "2026-03-15T18:07:05Z"
+    "durationSeconds" 905
+    "owner" "analytics@company.com"
+    "triggerType" "api"
+    "errorMessage" "Snowflake warehouse unavailable"
+    "steps" [{"name" "extract" "status" "success"}
+             {"name" "transform" "status" "failed"}
+             {"name" "load" "status" "queued"}]}])
+
+
+(def mock-runs (mapv normalize-run raw-runs))
+
+
+(defn fetch-runs!
+  []
+  (js/Promise.
+   (fn [resolve _reject]
+     (js/setTimeout #(resolve mock-runs) 600))))
+
+
+(defn retry-run!
+  [run-id]
+  (js/Promise.
+   (fn [resolve reject]
+     (js/setTimeout
+      (fn []
+        (let [active? (some #(= "running" (:status %)) mock-runs)]
+          (if active?
+            (reject "Retry not allowed while another run is active")
+            (resolve {:id run-id :status "queued" :message "Retry accepted"}))))
+      1200))))

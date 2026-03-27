@@ -1,0 +1,44 @@
+{:min-bb-version "0.9.161"
+ :tasks
+ {:requires ([babashka.fs :as fs]
+             [clojure.string :as str]
+             [babashka.process :refer [shell]])
+
+  dev
+  {:doc "Start shadow-cljs watch for :app build"
+   :task (shell "npx shadow-cljs watch app")}
+
+  portfolio
+  {:doc "Start shadow-cljs watch for :portfolio build"
+   :task (shell "npx shadow-cljs watch portfolio")}
+
+  release
+  {:doc "Production build of :app"
+   :task (shell "npx shadow-cljs release app")}
+
+  install
+  {:doc "Install npm dependencies"
+   :task (shell "npm install")}
+
+  format
+  {:doc "Format Clojure files with zprint"
+   :task (let [clj-file? (fn [path]
+                           (or (str/ends-with? path ".clj")
+                               (str/ends-with? path ".cljs")
+                               (str/ends-with? path ".cljc")))
+               files (concat ["bb.edn" "shadow-cljs.edn" ".zprint.edn"]
+                             (->> (concat (file-seq (fs/file "src"))
+                                          (file-seq (fs/file "test")))
+                                  (filter fs/regular-file?)
+                                  (map str)
+                                  (filter clj-file?)
+                                  sort))]
+           (apply shell "zprint" "-w" files))}
+
+  test
+  {:doc "Run tests"
+   :task (shell "npx shadow-cljs compile test && node out/test.js")}
+
+  clean
+  {:doc "Remove compiled output"
+   :task (shell "rm -rf resources/public/js resources/public/portfolio/js out")}}}
